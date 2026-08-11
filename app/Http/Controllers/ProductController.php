@@ -39,6 +39,8 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::with(['store', 'category', 'images', 'reviews.user'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();

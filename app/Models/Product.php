@@ -34,7 +34,15 @@ class Product extends Model
 
     public function getAverageRatingAttribute()
     {
-        return $this->reviews()->avg('rating') ?? 0;
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return (float) ($this->attributes['reviews_avg_rating'] ?? 0);
+        }
+
+        if ($this->relationLoaded('reviews')) {
+            return (float) ($this->reviews->avg('rating') ?? 0);
+        }
+
+        return (float) ($this->reviews()->avg('rating') ?? 0);
     }
 
     public function getFormattedPriceAttribute()

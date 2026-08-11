@@ -5,7 +5,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -57,9 +56,9 @@ class DashboardController extends Controller
 
         $data = $request->only([
             'store_name', 'description', 'address', 
-            'village', 'district', 'phone', 'whatsapp', 'is_active'
+            'village', 'district', 'phone', 'whatsapp'
         ]);
-        $data['slug'] = Str::slug($request->store_name);
+        $data['slug'] = \App\Models\Store::generateUniqueSlug($request->store_name, $store->id);
 
         if ($request->hasFile('logo')) {
             if ($store->logo) Storage::disk('public')->delete($store->logo);

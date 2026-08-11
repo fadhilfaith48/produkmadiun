@@ -54,14 +54,14 @@
             </div>
 
             {{-- Rating --}}
-            @if($product->reviews->count() > 0)
+            @if(($product->reviews_count ?? 0) > 0)
             <div class="d-flex align-items-center gap-2 mb-3">
                 <div style="color:#f4a228">
                     @for($i = 1; $i <= 5; $i++)
                         <i class="bi bi-star{{ $i <= round($product->average_rating) ? '-fill' : '' }}"></i>
                     @endfor
                 </div>
-                <span class="text-muted small">{{ number_format($product->average_rating, 1) }} ({{ $product->reviews->count() }} ulasan)</span>
+                <span class="text-muted small">{{ number_format($product->average_rating, 1) }} ({{ $product->reviews_count }} ulasan)</span>
             </div>
             @endif
 
@@ -127,7 +127,7 @@
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm p-3" style="border-radius:10px">
                     <div class="d-flex justify-content-between mb-1">
-                        <span class="fw-semibold">{{ $review->user->name ?? 'Anonim' }}</span>
+                        <span class="fw-semibold">{{ $review->reviewer_name ?: ($review->user->name ?? 'Anonim') }}</span>
                         <div style="color:#f4a228">
                             @for($i = 1; $i <= 5; $i++)
                                 <i class="bi bi-star{{ $i <= $review->rating ? '-fill' : '' }} small"></i>
@@ -141,6 +141,44 @@
         </div>
     </div>
     @endif
+
+    {{-- Form Ulasan --}}
+    <div class="card border-0 shadow-sm p-4 mt-4" style="border-radius:10px">
+        <h5 class="fw-bold mb-3">💬 Tulis Ulasan</h5>
+        <form action="{{ route('reviews.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="product_id" value="{{ $product->id }}">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Rating</label>
+                <div class="d-flex gap-3">
+                    @for($i = 1; $i <= 5; $i++)
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="rating" value="{{ $i }}"
+                               id="rate{{ $i }}" {{ old('rating') == $i ? 'checked' : '' }}>
+                        <label class="form-check-label" for="rate{{ $i }}" style="color:#f4a228">★ {{ $i }}</label>
+                    </div>
+                    @endfor
+                </div>
+                @error('rating') <div class="text-danger small">{{ $message }}</div> @enderror
+            </div>
+            @guest
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nama Anda</label>
+                <input type="text" name="reviewer_name" value="{{ old('reviewer_name') }}"
+                       class="form-control @error('reviewer_name') is-invalid @enderror">
+                @error('reviewer_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+            @endguest
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Komentar <span class="text-muted">(opsional)</span></label>
+                <textarea name="comment" rows="3" class="form-control"
+                          placeholder="Bagikan pengalaman Anda...">{{ old('comment') }}</textarea>
+            </div>
+            <button type="submit" class="btn text-white px-4" style="background:#2d6a4f">
+                Kirim Ulasan
+            </button>
+        </form>
+    </div>
 
     {{-- Produk Terkait --}}
     @if($related->count() > 0)

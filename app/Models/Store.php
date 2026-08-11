@@ -76,8 +76,24 @@ class Store extends Model
 
         static::creating(function ($store) {
             if (empty($store->slug)) {
-                $store->slug = Str::slug($store->store_name);
+                $store->slug = $store->generateUniqueSlug($store->store_name);
             }
         });
+    }
+
+    // Buat slug unik (cek duplikat di DB)
+    public static function generateUniqueSlug($name, $ignoreId = null)
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $i    = 1;
+
+        while (self::where('slug', $slug)
+            ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+            ->exists()) {
+            $slug = $base . '-' . ++$i;
+        }
+
+        return $slug;
     }
 }

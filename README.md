@@ -1,59 +1,98 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ProdukMadiun
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform e-commerce & direktori UMKM untuk produk lokal Kabupaten Madiun.
 
-## About Laravel
+Toko UMKM dapat mendaftar, memverifikasi, mengelola produk, menerima pesanan, dan terhubung langsung dengan pembeli. Pembeli dapat menjelajahi katalog, melihat detail toko/produk, melihat ulasan, dan memesan.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Publik** — beranda (katalog, kategori, toko terverifikasi), katalog produk dengan pencarian/filter/sortir, halaman produk dengan galeri & ulasan, halaman toko, keranjang berbasis session, checkout & lacak pesanan, pesan via WhatsApp.
+- **API publik** — `GET /api/publik/*` untuk produk, detail produk, UMKM, kecamatan, kategori, dan statistik.
+- **Panel UMKM** — dashboard, kelola profil toko, kelola produk (CRUD + galeri foto), kelola pesanan & status.
+- **Panel Admin** — dashboard, verifikasi toko, persetujuan ulasan, daftar toko.
+- **Role** — `admin`, `umkm`, `customer` via `RoleMiddleware` (`bootstrap/app.php`).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Stack Teknologi
 
-## Learning Laravel
+- Laravel 12 (PHP 8.2)
+- MySQL
+- Blade + Bootstrap 5 (Sass) + Tailwind 4 (Vite)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Persyaratan
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP >= 8.2
+- Composer
+- Node.js & npm
+- MySQL
 
-## Laravel Sponsors
+## Setup Lokal
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+# 1. Clone & install dependensi
+composer install
+npm install
 
-### Premium Partners
+# 2. Konfigurasi environment
+cp .env.example .env
+php artisan key:generate
+# edit .env: DB_DATABASE, DB_USERNAME, DB_PASSWORD, MAIL_*, dsb.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 3. Migrasi & seed database
+php artisan migrate
+php artisan db:seed
 
-## Contributing
+# 4. Storage link untuk upload gambar produk/toko
+php artisan storage:link
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 5. Jalankan dev server
+npm run dev          # frontend (Vite)
+php artisan serve    # backend (http://localhost:8000)
+```
 
-## Code of Conduct
+Untuk produksi gunakan `npm run build` untuk mengompilasi aset.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Struktur Proyek
 
-## Security Vulnerabilities
+```
+app/Http/Controllers/     # Admin/, Api/, Auth/, Umkm/ + publik
+app/Models/               # User, Store, Product, ProductImage, Category,
+                          #   Order, OrderItem, Review, Cart, Banner
+database/migrations/      # skema DB
+database/seeders/         # DatabaseSeeder
+resources/views/          # Blade: admin, auth, cart, orders, products,
+                          #   stores, umkm, partials, layouts
+routes/web.php            # rute web (publik, auth, umkm, admin)
+routes/api.php            # rute API publik (prefix /api/publik)
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Rute Utama
 
-## License
+| Area | Rute | Keterangan |
+| --- | --- | --- |
+| Publik | `/`, `/katalog`, `/katalog/{slug}`, `/toko`, `/toko/{slug}` | Beranda, katalog, detail produk/toko |
+| Keranjang | `/keranjang` | Keranjang berbasis session |
+| Pesanan | `/pesan/checkout`, `/pesan/sukses/{code}`, `/pesan/lacak` | Checkout & lacak pesanan |
+| UMKM | `/umkm/dashboard`, `/umkm/produk*`, `/umkm/pesanan*`, `/umkm/profil-toko` | Middleware `auth` + `role:umkm` |
+| Admin | `/admin/dashboard`, `/admin/toko*`, `/admin/ulasan*` | Middleware `auth` + `role:admin` |
+| API | `GET /api/publik/*` | API publik (produk, UMKM, kategori, kecamatan, statistik) |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Cek daftar lengkap: `php artisan route:list`.
+
+## Konvensi
+
+- Bahasa Indonesia untuk kode & komentar.
+- Produk/toko publik difilter `is_active` / `is_verified`.
+- Keranjang berbasis session; checkout transaksional (`DB::transaction`).
+- Upload gambar ke disk `public` via `Storage::disk('public')->store(...)`.
+- Controller memakai base `Controller`; view di-return dengan `view('...')`.
+
+## Testing
+
+```bash
+composer test
+```
+
+## Keamanan
+
+- `APP_DEBUG` harus `false` dan gunakan credential mail yang tidak terekspos untuk environment produksi.
+- Batasi akses panel dengan middleware role, jangan hanya `auth`.

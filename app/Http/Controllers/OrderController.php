@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -43,59 +45,101 @@ class OrderController extends Controller
             return redirect()->route('cart.index');
         }
 
-        $firstItem  = reset($cart);
-        $storeId    = $firstItem['store_id'];
-        $subtotal   = 0;
-        $orderItems = [];
+        $products = Product::with('store')
+            ->whereIn('id', array_keys($cart))
+            ->get()
+            ->keyBy('id');
 
+        // Kelompokkan item keranjang per toko + validasi produk & stok
+        $groups = [];
         foreach ($cart as $productId => $item) {
-            $product   = Product::find($productId);
-            $sub       = $product->price * $item['qty'];
-            $subtotal += $sub;
-            $orderItems[] = [
-                'product_id'   => $productId,
-                'product_name' => $product->name,
-                'price'        => $product->price,
-                'quantity'     => $item['qty'],
-                'subtotal'     => $sub,
+            $product = $products->get($productId);
+
+            if (!$product || !$product->is_active) {
+                throw ValidationException::withMessages([
+                    'product' => 'Ada produk yang tidak tersedia lagi. Periksa kembali keranjang Anda.',
+                ]);
+            }
+
+            if ($product->stock < $item['qty']) {
+                throw ValidationException::withMessages([
+                    'product' => 'Stok "' . $product->name . '" tidak mencukupi. Hanya tersisa ' . $product->stock . ' ' . $product->unit . '.',
+                ]);
+            }
+
+            $groups[$product->store_id][$productId] = [
+                'product' => $product,
+                'qty'     => $item['qty'],
             ];
         }
 
-        $order = Order::create([
-            'order_code'        => Order::generateCode(),
-    'user_id'    => Auth::id(),
-            'store_id'          => $storeId,
-            'customer_name'     => $request->customer_name,
-            'customer_phone'    => $request->customer_phone,
-            'customer_whatsapp' => $request->customer_whatsapp,
-            'customer_address'  => $request->customer_address,
-            'subtotal'          => $subtotal,
-            'shipping_cost'     => 0,
-            'total'             => $subtotal,
-            'notes'             => $request->notes,
-            'payment_method'    => $request->payment_method,
-        ]);
+        // Buat satu pesanan per toko dalam satu transaksi
+        $orders = DB::transaction(function () use ($groups, $request) {
+            $created = collect();
 
-        $order->items()->createMany($orderItems);
+            foreach ($groups as $storeId => $items) {
+                $subtotal   = 0;
+                $orderItems = [];
 
-        foreach ($cart as $productId => $item) {
-            Product::find($productId)->decrement('stock', $item['qty']);
-        }
+                foreach ($items as $productId => $item) {
+                    $product = $item['product'];
+                    $sub     = $product->price * $item['qty'];
+                    $subtotal += $sub;
+
+                    $orderItems[] = [
+                        'product_id'   => $productId,
+                        'product_name' => $product->name,
+                        'price'        => $product->price,
+                        'quantity'     => $item['qty'],
+                        'subtotal'     => $sub,
+                    ];
+                }
+
+                $order = Order::create([
+                    'order_code'        => Order::generateCode(),
+                    'user_id'           => Auth::id(),
+                    'store_id'          => $storeId,
+                    'customer_name'     => $request->customer_name,
+                    'customer_phone'    => $request->customer_phone,
+                    'customer_whatsapp' => $request->customer_whatsapp,
+                    'customer_address'  => $request->customer_address,
+                    'subtotal'          => $subtotal,
+                    'shipping_cost'     => 0,
+                    'total'             => $subtotal,
+                    'notes'             => $request->notes,
+                    'payment_method'    => $request->payment_method,
+                ]);
+
+                $order->items()->createMany($orderItems);
+
+                foreach ($items as $productId => $item) {
+                    Product::where('id', $productId)->decrement('stock', $item['qty']);
+                }
+
+                $created->push($order);
+            }
+
+            return $created;
+        });
 
         session()->forget('cart');
+        session()->flash('order_ids', $orders->pluck('id')->all());
 
-        if ($request->payment_method === 'whatsapp') {
-            return redirect()->route('order.whatsapp', $order->id);
-        }
-
-        return redirect()->route('order.success', $order->order_code);
+        return redirect()->route('order.success', $orders->first()->order_code);
     }
 
     public function success($code)
     {
         $order = Order::with(['items.product', 'store'])
                     ->where('order_code', $code)->firstOrFail();
-        return view('orders.success', compact('order'));
+
+        $ids   = session()->get('order_ids', [$order->id]);
+        $orders = Order::with(['items.product', 'store'])
+                    ->whereIn('id', $ids)
+                    ->orderBy('id')
+                    ->get();
+
+        return view('orders.success', compact('orders'));
     }
 
     public function whatsapp($id)

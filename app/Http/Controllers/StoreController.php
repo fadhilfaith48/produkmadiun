@@ -21,7 +21,11 @@ class StoreController extends Controller
     {
         $store = Store::with(['products' => function($query) {
             $query->where('is_active', true)->latest();
-        }])->where('slug', $slug)->firstOrFail();
+        }])
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->where('is_verified', true)
+            ->firstOrFail();
         
         return view('stores.show', compact('store'));
     }

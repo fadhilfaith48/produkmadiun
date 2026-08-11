@@ -67,7 +67,7 @@ class User extends Authenticatable
 
     public function isCustomer(): bool
     {
-        return $this->role === 'customer' || !$this->role;
+        return !$this->isAdmin() && !$this->isUmkm();
     }
 
     public function hasRole(string $role): bool
