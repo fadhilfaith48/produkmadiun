@@ -56,7 +56,7 @@ class ProductController extends Controller
 
         $categories = Category::orderBy('name')->get();
 
-        return view('products.create', compact('categories', 'store'));
+        return view('umkm.products.create', compact('categories', 'store'));
     }
 
     /**

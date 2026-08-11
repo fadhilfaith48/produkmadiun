@@ -263,6 +263,12 @@
                         @if(auth()->user()->isAdmin())
                             <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">
                                 <i class="bi bi-speedometer2 me-2"></i>Panel Admin</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.stores') }}">
+                                <i class="bi bi-shop me-2"></i>Kelola Toko</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.reviews') }}">
+                                <i class="bi bi-chat-square-text me-2"></i>Kelola Ulasan</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.banners.index') }}">
+                                <i class="bi bi-images me-2"></i>Kelola Banner</a></li>
                         @elseif(auth()->user()->isUmkm())
                             <li><a class="dropdown-item" href="{{ route('umkm.dashboard') }}">
                                 <i class="bi bi-shop me-2"></i>Panel UMKM</a></li>
@@ -342,7 +348,16 @@
                 <div class="section-label">Akun: {{ auth()->user()->name }}</div>
                 @if(auth()->user()->isAdmin())
                     <a href="{{ route('admin.dashboard') }}">
-                        <i class="bi bi-speedometer2"></i> Panel Admin
+                        <i class="bi bi-speedometer2"></i> Dashboard Admin
+                    </a>
+                    <a href="{{ route('admin.stores') }}">
+                        <i class="bi bi-shop"></i> Kelola Toko
+                    </a>
+                    <a href="{{ route('admin.reviews') }}">
+                        <i class="bi bi-chat-square-text"></i> Kelola Ulasan
+                    </a>
+                    <a href="{{ route('admin.banners.index') }}">
+                        <i class="bi bi-images"></i> Kelola Banner
                     </a>
                 @elseif(auth()->user()->isUmkm())
                     <a href="{{ route('umkm.dashboard') }}">

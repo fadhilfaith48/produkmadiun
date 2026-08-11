@@ -32,6 +32,28 @@ class DashboardController extends Controller
     }
 
     /**
+     * Halaman kelola ulasan — semua ulasan dengan status persetujuan.
+     */
+    public function reviews()
+    {
+        $reviews = Review::with(['product', 'user'])
+            ->orderBy('is_approved', 'asc')
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.reviews', compact('reviews'));
+    }
+
+    /**
+     * Sembunyikan ulasan (batalkan persetujuan).
+     */
+    public function rejectReview($id)
+    {
+        Review::findOrFail($id)->update(['is_approved' => false]);
+        return back()->with('success', 'Ulasan disembunyikan.');
+    }
+
+    /**
      * Halaman kelola toko — daftar semua toko + status verifikasi.
      */
     public function stores()

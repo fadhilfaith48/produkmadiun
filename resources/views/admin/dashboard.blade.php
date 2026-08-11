@@ -5,6 +5,12 @@
 <div class="container py-4">
     <h3 class="fw-bold mb-4">Dashboard Admin ProdukMadiun</h3>
 
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{{ route('admin.stores') }}" class="btn btn-outline-success btn-sm">🏪 Kelola Toko</a>
+        <a href="{{ route('admin.reviews') }}" class="btn btn-outline-success btn-sm">💬 Kelola Ulasan</a>
+        <a href="{{ route('admin.banners.index') }}" class="btn btn-outline-success btn-sm">🎯 Kelola Banner</a>
+    </div>
+
     {{-- Statistik --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">

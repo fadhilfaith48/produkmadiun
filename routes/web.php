@@ -23,6 +23,7 @@ use App\Http\Controllers\Umkm\OrderController as UmkmOrder;
 // CONTROLLER ADMIN
 // ============================================================
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\BannerController as AdminBanner;
 
 // ============================================================
 // HALAMAN PUBLIK
@@ -121,10 +122,22 @@ Route::prefix('umkm')->name('umkm.')->middleware(['auth', 'role:umkm'])->group(f
 // ============================================================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+
+    // Kelola Ulasan
+    Route::get('/ulasan', [AdminDashboard::class, 'reviews'])->name('reviews');
     Route::put('/ulasan/{id}/approve', [AdminDashboard::class, 'approveReview'])->name('reviews.approve');
+    Route::put('/ulasan/{id}/tolak', [AdminDashboard::class, 'rejectReview'])->name('reviews.reject');
 
     // Kelola Toko
     Route::get('/toko', [AdminDashboard::class, 'stores'])->name('stores');
     Route::put('/toko/{id}/verifikasi', [AdminDashboard::class, 'verifyStore'])->name('stores.verify');
     Route::put('/toko/{id}/batalkan', [AdminDashboard::class, 'unverifyStore'])->name('stores.unverify');
+
+    // Kelola Banner
+    Route::get('/banner',              [AdminBanner::class, 'index'])->name('banners.index');
+    Route::get('/banner/tambah',       [AdminBanner::class, 'create'])->name('banners.create');
+    Route::post('/banner',             [AdminBanner::class, 'store'])->name('banners.store');
+    Route::get('/banner/{id}/edit',    [AdminBanner::class, 'edit'])->name('banners.edit');
+    Route::put('/banner/{id}',         [AdminBanner::class, 'update'])->name('banners.update');
+    Route::delete('/banner/{id}',      [AdminBanner::class, 'destroy'])->name('banners.destroy');
 });
