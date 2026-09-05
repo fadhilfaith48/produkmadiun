@@ -32,6 +32,12 @@ class Product extends Model
         return $this->hasMany(Review::class)->where('is_approved', true);
     }
 
+    public function scopeAvailableForPublic($query)
+    {
+        return $query->where('is_active', true)
+            ->whereHas('store', fn($q) => $q->where('is_verified', true)->where('is_active', true));
+    }
+
     public function getAverageRatingAttribute()
     {
         if (array_key_exists('reviews_avg_rating', $this->attributes)) {

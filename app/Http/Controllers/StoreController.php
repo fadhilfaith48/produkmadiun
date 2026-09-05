@@ -10,7 +10,9 @@ class StoreController extends Controller
 {
     public function index()
     {
-        $stores = Store::withCount('products')
+        $stores = Store::withCount([
+                'products' => fn($q) => $q->availableForPublic(),
+            ])
                      ->where('is_active', true)
                      ->paginate(12);
                      
@@ -20,7 +22,7 @@ class StoreController extends Controller
     public function show($slug)
     {
         $store = Store::with(['products' => function($query) {
-            $query->where('is_active', true)->latest();
+            $query->availableForPublic()->latest();
         }])
             ->where('slug', $slug)
             ->where('is_active', true)

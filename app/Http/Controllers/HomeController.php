@@ -15,13 +15,15 @@ class HomeController extends Controller
     public function index()
     {
         $banners        = Banner::where('is_active', true)->orderBy('order')->get();
-        $categories     = Category::withCount('products')->get();
+        $categories     = Category::withCount([
+                            'products' => fn($q) => $q->availableForPublic(),
+                        ])->get();
         $featuredProducts = Product::with(['store', 'category'])
-                            ->where('is_active', true)
+                            ->availableForPublic()
                             ->orderBy('views', 'desc')
                             ->take(8)->get();
         $newProducts    = Product::with(['store', 'category'])
-                            ->where('is_active', true)
+                            ->availableForPublic()
                             ->latest()->take(8)->get();
                             
         // ✅ UDAH AMAN! Tabel stores sudah ada

@@ -69,3 +69,19 @@ Daftar pekerjaan berdasarkan audit kode. Diurutkan dari prioritas tertinggi.
 - [x] `php artisan migrate:fresh --seed` berhasil.
 - [x] `npm run build` sukses.
 - [x] `composer test` hijau (atau ditulis test baru).
+
+
+1. Produk toko non-verifikasi tampil di katalog web — ProductController@index/show hanya filter is_active produk (ProductController.php:13), tidak filter toko is_verified/is_active. Padahal API sudah benar via whereHas('store'). Inkon sisten.
+2. Race condition stok checkout — cek stok OrderController.php:64 tanpa lockForUpdate(); 2 checkout paralel bisa oversell.
+3. Keranjang tidak cek stok saat update/tambah qty — CartController::add (:53) menambah qty tanpa cek total vs stok; error baru ketahuan di checkout.
+Keamanan/otorisasi:
+4. Verifikasi email tidak di-enforce — panel UMKM/admin hanya auth+role, tanpa middleware verified.
+Moderasi:
+5. Produk baru langsung aktif — Umkm\ProductController.php:109 set is_active=true saat create → langsung tampil publik meski toko belum terverifikasi.
+Kualitas/testing:
+6. Tes otomatis hampir kosong — hanya 2 ExampleTest. Belum ada tes untuk checkout, role middleware, filter publik, CRUD.
+7. Seeder minim — tidak ada akun customer, ulasan contoh, atau 2+ toko untuk uji lintas toko.
+Opsional (catatan, bukan bug):
+8. Pembayaran masih manual WhatsApp (sesuai scope PRD).
+9. Order::generateCode() pakai uniqid — risiko collision kecil.
+10. Ulasan tidak bisa diedit/dihapus admin (hanya approve/tolak).

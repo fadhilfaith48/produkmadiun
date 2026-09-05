@@ -10,7 +10,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['store', 'category'])->where('is_active', true);
+        $query = Product::with(['store', 'category'])->availableForPublic();
 
         // Filter kategori
         if ($request->filled('category')) {
@@ -42,7 +42,7 @@ class ProductController extends Controller
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->where('slug', $slug)
-            ->where('is_active', true)
+            ->availableForPublic()
             ->firstOrFail();
 
         // Tambah view count
@@ -52,7 +52,7 @@ class ProductController extends Controller
         $related = Product::with('store')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->where('is_active', true)
+            ->availableForPublic()
             ->take(4)
             ->get();
 

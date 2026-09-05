@@ -20,7 +20,7 @@ class PublikController extends Controller
                 'store:id,store_name,slug,district,whatsapp,logo',
                 'category:id,name,slug',
             ])
-            ->where('is_active', true)
+            ->availableForPublic()
             ->select('id','store_id','category_id','name','slug',
                      'description','price','stock','unit','image',
                      'weight','views');
@@ -59,7 +59,7 @@ class PublikController extends Controller
                 'store:id,store_name,slug,address,district,phone,whatsapp,logo',
                 'category:id,name,slug',
             ])
-            ->where('is_active', true)
+            ->availableForPublic()
             ->findOrFail($id);
 
         // Tambah view count
@@ -80,7 +80,7 @@ class PublikController extends Controller
     {
         $query = Store::with([
                 'products' => function($q) {
-                    $q->where('is_active', true)
+                    $q->availableForPublic()
                       ->select('id','store_id','name','slug','price','image')
                       ->limit(4);
                 }
@@ -113,7 +113,7 @@ class PublikController extends Controller
     {
         $toko = Store::with([
                 'products' => function($q) {
-                    $q->where('is_active', true)
+                    $q->availableForPublic()
                       ->select('id','store_id','name','slug',
                                'price','stock','unit','image','description');
                 }
@@ -158,7 +158,7 @@ class PublikController extends Controller
     {
         $kategori = Category::withCount([
                 'products' => function($q) {
-                    $q->where('is_active', true);
+                    $q->availableForPublic();
                 }
             ])
             ->select('id','name','slug','icon')
@@ -183,7 +183,7 @@ class PublikController extends Controller
             'message' => 'Statistik platform ProdukMadiun',
             'data'    => [
                 'total_umkm'    => Store::where('is_verified', true)->where('is_active', true)->count(),
-                'total_produk'  => Product::where('is_active', true)->count(),
+                'total_produk'  => Product::availableForPublic()->count(),
                 'total_kategori'=> Category::count(),
                 'kecamatan'     => Store::where('is_verified', true)
                                     ->whereNotNull('district')
