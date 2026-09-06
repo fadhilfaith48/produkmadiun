@@ -45,36 +45,38 @@ class OrderController extends Controller
             return redirect()->route('cart.index');
         }
 
-        $products = Product::with('store')
-            ->whereIn('id', array_keys($cart))
-            ->get()
-            ->keyBy('id');
-
-        // Kelompokkan item keranjang per toko + validasi produk & stok
-        $groups = [];
-        foreach ($cart as $productId => $item) {
-            $product = $products->get($productId);
-
-            if (!$product || !$product->is_active) {
-                throw ValidationException::withMessages([
-                    'product' => 'Ada produk yang tidak tersedia lagi. Periksa kembali keranjang Anda.',
-                ]);
-            }
-
-            if ($product->stock < $item['qty']) {
-                throw ValidationException::withMessages([
-                    'product' => 'Stok "' . $product->name . '" tidak mencukupi. Hanya tersisa ' . $product->stock . ' ' . $product->unit . '.',
-                ]);
-            }
-
-            $groups[$product->store_id][$productId] = [
-                'product' => $product,
-                'qty'     => $item['qty'],
-            ];
-        }
-
         // Buat satu pesanan per toko dalam satu transaksi
-        $orders = DB::transaction(function () use ($groups, $request) {
+        $orders = DB::transaction(function () use ($cart, $request) {
+            // Kunci baris produk (lockForUpdate) agar 2 checkout paralel tidak oversell
+            $products = Product::with('store')
+                ->whereIn('id', array_keys($cart))
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            // Kelompokkan item keranjang per toko + validasi produk & stok
+            $groups = [];
+            foreach ($cart as $productId => $item) {
+                $product = $products->get($productId);
+
+                if (!$product || !$product->is_active) {
+                    throw ValidationException::withMessages([
+                        'product' => 'Ada produk yang tidak tersedia lagi. Periksa kembali keranjang Anda.',
+                    ]);
+                }
+
+                if ($product->stock < $item['qty']) {
+                    throw ValidationException::withMessages([
+                        'product' => 'Stok "' . $product->name . '" tidak mencukupi. Hanya tersisa ' . $product->stock . ' ' . $product->unit . '.',
+                    ]);
+                }
+
+                $groups[$product->store_id][$productId] = [
+                    'product' => $product,
+                    'qty'     => $item['qty'],
+                ];
+            }
+
             $created = collect();
 
             foreach ($groups as $storeId => $items) {
