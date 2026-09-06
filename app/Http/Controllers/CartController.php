@@ -41,24 +41,22 @@ class CartController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        if ($product->stock < $request->qty) {
-            return back()->with('error', 'Stok tidak mencukupi!');
-        }
-
         $cart = Session::get('cart', []);
         $id   = $request->product_id;
 
-        if (isset($cart[$id])) {
-            // Kalau sudah ada, tambah qty-nya
-            $cart[$id]['qty'] += $request->qty;
-        } else {
-            // Kalau belum ada, buat entry baru
-            // ✅ store_id disimpan di sini — dipakai saat checkout
-            $cart[$id] = [
-                'qty'      => $request->qty,
-                'store_id' => $product->store_id,
-            ];
+        $currentQty = $cart[$id]['qty'] ?? 0;
+        $newQty     = $currentQty + (int) $request->qty;
+
+        if ($newQty > $product->stock) {
+            $sisa = max(0, $product->stock - $currentQty);
+            return back()->with('error', 'Stok tidak mencukupi! ' . ($sisa > 0 ? 'Sisa ' . $sisa . ' ' . $product->unit . '.' : 'Stok sudah habis.'));
         }
+
+        $cart[$id] = [
+            'qty'      => $newQty,
+            // ✅ store_id disimpan di sini — dipakai saat checkout
+            'store_id' => $product->store_id,
+        ];
 
         Session::put('cart', $cart);
 
@@ -68,11 +66,26 @@ class CartController extends Controller
     // Update jumlah produk di keranjang
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'qty' => 'required|integer|min:1|max:100',
+        ]);
+
         $cart = Session::get('cart', []);
 
         if (isset($cart[$id])) {
-            $qty = max(1, (int) $request->qty);
-            $cart[$id]['qty'] = $qty;
+            $product = Product::find($id);
+
+            if (!$product || !$product->is_active) {
+                unset($cart[$id]);
+                Session::put('cart', $cart);
+                return back()->with('error', 'Produk tidak tersedia lagi dan dihapus dari keranjang.');
+            }
+
+            if ($request->qty > $product->stock) {
+                return back()->with('error', 'Stok tidak mencukupi! Maksimal ' . $product->stock . ' ' . $product->unit . '.');
+            }
+
+            $cart[$id]['qty'] = (int) $request->qty;
             Session::put('cart', $cart);
         }
 
