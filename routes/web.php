@@ -90,7 +90,7 @@ Route::middleware('auth')->group(function () {
 // ============================================================
 // PANEL UMKM
 // ============================================================
-Route::prefix('umkm')->name('umkm.')->middleware(['auth', 'role:umkm'])->group(function () {
+Route::prefix('umkm')->name('umkm.')->middleware(['auth', 'verified', 'role:umkm'])->group(function () {
 
     // Dashboard & Profil Toko
     Route::get('/dashboard',   [UmkmDashboard::class, 'index'])->name('dashboard');
@@ -120,7 +120,7 @@ Route::prefix('umkm')->name('umkm.')->middleware(['auth', 'role:umkm'])->group(f
 // ============================================================
 // PANEL ADMIN
 // ============================================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
     // Kelola Ulasan

@@ -36,6 +36,8 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
+        $user->sendEmailVerificationNotification();
+
         if ($user->role === 'umkm') {
             return redirect('/umkm/dashboard');
         }

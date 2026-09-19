@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role'     => 'admin',
             'phone'    => '081234567890',
+            'email_verified_at' => now(),
         ]);
  
         // ---- Kategori ----
@@ -40,6 +41,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role'     => 'umkm',
             'phone'    => '082112345678',
+            'email_verified_at' => now(),
         ]);
  
         // ---- Toko UMKM Contoh ----
