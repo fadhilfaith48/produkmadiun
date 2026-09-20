@@ -82,6 +82,13 @@
                 </div>
 
                 <div class="mt-4">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
+                               value="1" {{ old('is_active') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="is_active">Produk Aktif (tampil di publik)</label>
+                        <div class="small text-muted">Jika tidak dicentang, produk tersimpan tetapi tidak tampil di katalog.</div>
+                    </div>
+
                     <button type="submit" class="btn text-white fw-semibold px-5"
                             style="background:#2D6A4F;border-radius:8px;padding:10px">
                         Simpan Produk

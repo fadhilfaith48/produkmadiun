@@ -106,7 +106,7 @@ class ProductController extends Controller
             'unit'        => $request->unit,
             'weight'      => $request->weight ?? 0,
             'image'       => $imagePath,
-            'is_active'   => true,
+            'is_active'   => $request->has('is_active'),
         ]);
 
         // Upload foto galeri tambahan
