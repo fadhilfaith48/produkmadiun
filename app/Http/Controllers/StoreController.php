@@ -14,6 +14,7 @@ class StoreController extends Controller
                 'products' => fn($q) => $q->availableForPublic(),
             ])
                      ->where('is_active', true)
+                     ->where('is_verified', true)
                      ->paginate(12);
                      
         return view('stores.index', compact('stores'));
