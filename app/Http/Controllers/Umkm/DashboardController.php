@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $totalProducts  = $store->products()->count();
         $totalOrders    = $store->orders()->count() ?? 0;
         $pendingOrders  = $store->orders()->whereIn('status', ['pending', 'confirmed'])->count() ?? 0;
-        $totalRevenue   = $store->orders()->whereIn('status', ['completed', 'delivered'])->sum('total') ?? 0;
+        $totalRevenue   = $store->orders()->whereIn('status', ['completed', 'shipped'])->sum('total') ?? 0;
         
         $recentOrders   = $store->orders()->with(['items.product'])->latest()->take(5)->get();
         $topProducts    = $store->products()->orderBy('created_at', 'desc')->take(5)->get();
