@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -78,6 +79,10 @@ class Order extends Model
     // Order code generator
     public static function generateCode()
     {
-        return 'ORD-' . date('Ymd') . '-' . strtoupper(uniqid());
+        $code = 'ORD-' . date('Ymd') . '-' . strtoupper(Str::random(8));
+        while (self::where('order_code', $code)->exists()) {
+            $code = 'ORD-' . date('Ymd') . '-' . strtoupper(Str::random(8));
+        }
+        return $code;
     }
 }
