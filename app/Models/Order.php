@@ -30,6 +30,24 @@ class Order extends Model
         'total' => 'decimal:2',
     ];
 
+    public const STATUSES = [
+        'pending',
+        'confirmed',
+        'processing',
+        'shipped',
+        'completed',
+        'cancelled',
+    ];
+
+    public const STATUS_TRANSITIONS = [
+        'pending'    => ['confirmed', 'cancelled'],
+        'confirmed'  => ['processing', 'cancelled'],
+        'processing' => ['shipped', 'cancelled'],
+        'shipped'    => ['completed'],
+        'completed'  => [],
+        'cancelled'  => [],
+    ];
+
     // ===============================
     // RELASI
     // ===============================
@@ -51,7 +69,11 @@ class Order extends Model
     // Status helpers
     public function getStatusLabelAttribute()
     {
-        $status = $this->status ?? 'pending';
+        return self::statusLabel($this->status ?? 'pending');
+    }
+
+    public static function statusLabel(string $status): string
+    {
         return match($status) {
             'pending' => 'Menunggu Pembayaran',
             'confirmed' => 'Dibayar',
@@ -61,6 +83,16 @@ class Order extends Model
             'cancelled' => 'Dibatalkan',
             default => 'Unknown'
         };
+    }
+
+    public function allowedNextStatuses(): array
+    {
+        return self::STATUS_TRANSITIONS[$this->status] ?? [];
+    }
+
+    public function canTransitionTo(string $status): bool
+    {
+        return in_array($status, $this->allowedNextStatuses(), true);
     }
 
     public function getStatusColorAttribute()
