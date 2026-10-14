@@ -47,8 +47,14 @@ class OrderController extends Controller
         $order = Order::where('store_id', $store->id)->findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:pending,confirmed,processing,shipped,completed,cancelled',
+            'status' => 'required|in:' . implode(',', Order::STATUSES),
         ]);
+
+        if (!$order->canTransitionTo($request->status)) {
+            return back()->withErrors([
+                'status' => 'Status tidak dapat diubah dari "' . $order->status_label . '" ke status yang dipilih.',
+            ]);
+        }
 
         $order->update(['status' => $request->status]);
 
