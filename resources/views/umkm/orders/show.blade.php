@@ -18,6 +18,13 @@
     </div>
     @endif
 
+    @if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-circle me-2"></i>{{ $errors->first() }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+
     <div class="row g-4">
         {{-- Info Pesanan --}}
         <div class="col-md-8">
@@ -83,19 +90,26 @@
                     </p>
                     <p class="mb-3 text-muted small">Tanggal: {{ $order->created_at->format('d M Y H:i') }}</p>
 
+                    @if(count($order->allowedNextStatuses()) > 0)
                     <form action="{{ route('umkm.orders.update-status', $order->id) }}" method="POST">
                         @csrf @method('PUT')
                         <div class="mb-3">
                             <select name="status" class="form-select">
-                                @foreach(['pending'=>'Menunggu Pembayaran','confirmed'=>'Dikonfirmasi','processing'=>'Diproses','shipped'=>'Dikirim','completed'=>'Selesai','cancelled'=>'Dibatalkan'] as $val => $label)
-                                <option value="{{ $val }}" {{ $order->status == $val ? 'selected' : '' }}>
-                                    {{ $label }}
+                                <option value="{{ $order->status }}" selected>
+                                    {{ $order->status_label }} (saat ini)
                                 </option>
+                                @foreach($order->allowedNextStatuses() as $val)
+                                <option value="{{ $val }}">{{ \App\Models\Order::statusLabel($val) }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <button type="submit" class="btn btn-success w-100">Simpan Status</button>
                     </form>
+                    @else
+                    <p class="text-muted small mb-0">
+                        Status ini bersifat final dan tidak dapat diubah lagi.
+                    </p>
+                    @endif
                 </div>
             </div>
         </div>

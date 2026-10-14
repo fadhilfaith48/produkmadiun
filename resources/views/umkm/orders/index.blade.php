@@ -69,17 +69,26 @@
                                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
                                             data-bs-toggle="dropdown">Status</button>
                                     <ul class="dropdown-menu">
-                                        @foreach(['pending'=>'Menunggu','confirmed'=>'Dikonfirmasi','processing'=>'Diproses','shipped'=>'Dikirim','completed'=>'Selesai','cancelled'=>'Dibatalkan'] as $val => $label)
+                                        <li>
+                                            <span class="dropdown-item-text small text-muted">
+                                                {{ $order->status_label }} (saat ini)
+                                            </span>
+                                        </li>
+                                        @forelse($order->allowedNextStatuses() as $val)
                                         <li>
                                             <form action="{{ route('umkm.orders.update-status', $order->id) }}" method="POST">
                                                 @csrf @method('PUT')
                                                 <input type="hidden" name="status" value="{{ $val }}">
-                                                <button class="dropdown-item {{ $order->status == $val ? 'fw-bold text-success' : '' }}">
-                                                    {{ $label }}
+                                                <button class="dropdown-item">
+                                                    {{ \App\Models\Order::statusLabel($val) }}
                                                 </button>
                                             </form>
                                         </li>
-                                        @endforeach
+                                        @empty
+                                        <li>
+                                            <span class="dropdown-item-text small text-muted">Tidak ada aksi</span>
+                                        </li>
+                                        @endforelse
                                     </ul>
                                 </div>
                             </td>
