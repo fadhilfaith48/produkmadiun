@@ -127,6 +127,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:ad
     Route::get('/ulasan', [AdminDashboard::class, 'reviews'])->name('reviews');
     Route::put('/ulasan/{id}/approve', [AdminDashboard::class, 'approveReview'])->name('reviews.approve');
     Route::put('/ulasan/{id}/tolak', [AdminDashboard::class, 'rejectReview'])->name('reviews.reject');
+    Route::get('/ulasan/{id}/edit', [AdminDashboard::class, 'editReview'])->name('reviews.edit');
+    Route::put('/ulasan/{id}', [AdminDashboard::class, 'updateReview'])->name('reviews.update');
+    Route::delete('/ulasan/{id}', [AdminDashboard::class, 'deleteReview'])->name('reviews.delete');
 
     // Kelola Toko
     Route::get('/toko', [AdminDashboard::class, 'stores'])->name('stores');

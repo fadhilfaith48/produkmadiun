@@ -95,7 +95,27 @@
                                     </form>
                                 @endif
                             </td>
-                        </tr>
+                            <td>
+                                @if($review->is_approved)
+                                <form action="{{ route('admin.reviews.reject', $review->id) }}"
+                                      method="POST" class="d-inline">
+                                    @csrf @method('PUT')
+                                    <button class="btn btn-sm btn-outline-danger">Sembunyikan</button>
+                                </form>
+                                @endif
+                                @if($review->is_approved)
+                                |
+                                <a href="{{ route('reviews.edit', $review->id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Edit
+                                </a>
+                                @endif
+                                |
+                                <form action="{{ route('reviews.delete', $review->id) }}"
+                                      method="POST" class="d-inline" onclick="return confirm('Yakin menghapus ulasan ini?')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger">Hapus</button>
+                                </form>
                         @empty
                         <tr>
                             <td colspan="7" class="text-center py-4 text-muted">Belum ada ulasan</td>

@@ -53,6 +53,33 @@ class DashboardController extends Controller
         return back()->with('success', 'Ulasan disembunyikan.');
     }
 
+    public function editReview($id)
+    {
+        $review = Review::findOrFail($id);
+        return view('admin.review-edit', compact('review'));
+    }
+
+    public function updateReview(Request $request, $id)
+    {
+        $request->validate([
+            'rating'    => 'required|integer|between:1,5',
+            'comment'   => 'nullable|string|max:1000',
+        ]);
+
+        Review::findOrFail($id)->update([
+            'rating'    => $request->rating,
+            'comment'   => $request->comment,
+        ]);
+
+        return back()->with('success', 'Ulasan berhasil diperbarui.');
+    }
+
+    public function deleteReview($id)
+    {
+        Review::findOrFail($id)->delete();
+        return back()->with('success', 'Ulasan dihapus.');
+    }
+
     /**
      * Halaman kelola toko — daftar semua toko + status verifikasi.
      */
