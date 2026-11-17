@@ -7,13 +7,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3 class="fw-bold mb-0">✏️ Edit Ulasan</h3>
-            <small class="text-muted">Idaran ID: {{ $review->id }}</small>
+            <small class="text-muted">ID Ulasan: {{ $review->id }}</small>
         </div>
-        <a href="{{ route('reviews') }}" class="btn btn-outline-secondary btn-sm">← Kembali ke Daftar Ulasan</a>
+        <a href="{{ route('admin.reviews') }}" class="btn btn-outline-secondary btn-sm">← Kembali ke Daftar Ulasan</a>
     </div>
 
-    @if($canMakeChanges)
-    <form action="{{ route('reviews.update', $review->id) }}" method="POST">
+    <form action="{{ route('admin.reviews.update', $review->id) }}" method="POST">
         @csrf @method('PUT')
         <div class="row g-3">
             <div class="col-md-6">
@@ -36,14 +35,9 @@
             </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-success w-100">Simpan Perubahan</button>
-                <a href="{{ route('reviews') }}" class="btn btn-outline-secondary w-100 mt-2">Batal</a>
+                <a href="{{ route('admin.reviews') }}" class="btn btn-outline-secondary w-100 mt-2">Batal</a>
             </div>
         </div>
     </form>
-    @else
-    <div class="alert alert-warning">
-        Ulasan ini tidak dapat diedit (hanya bisa disetujui/disembunyikan admin).
-    </div>
-    @endif
 </div>
 @endsection
