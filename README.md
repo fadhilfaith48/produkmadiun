@@ -120,6 +120,7 @@ produkmadiun/
 ├── tests/                                # PHPUnit feature test
 ├── ARCHITECTURE.md · PRD.md · TODO.md
 ├── WORKFLOW.md · UJI_MANUAL.md · SKILL.md
+├── LICENSE
 └── AGENTS.md
 ```
 
@@ -235,7 +236,7 @@ Dokumen level proyek ada di root repo:
 
 ## Lisensi
 
-Dirilis di bawah [MIT License](https://opensource.org/licenses/MIT) (lihat `license` pada `composer.json`).
+Dirilis di bawah [MIT License](LICENSE) — Copyright (c) 2026 fadhilfaith48.
 
 ## Kredit
 
